@@ -8,6 +8,7 @@ import {
   FormErrors
 } from '../utils/formValidation'
 import { X } from 'lucide-react'
+import { EDITABLE_STATUSES } from '../utils/permissions'
 
 interface RequestFormProps {
   request?: PaymentRequest
@@ -16,8 +17,6 @@ interface RequestFormProps {
   initialConsultantName?: string
   isConsultant?: boolean
 }
-
-const EDITABLE_STATUSES = ['טיוטה', 'בדיקה', 'ממתין להבהרה']
 
 export function RequestForm({ request, onSave, onCancel, initialConsultantName, isConsultant }: RequestFormProps) {
   const isEditMode = !!request
@@ -352,7 +351,29 @@ export function RequestForm({ request, onSave, onCancel, initialConsultantName, 
             </label>
           </div>
         </div>
-      </div>
+        {/* Notes History */}
+      {request?.notes && request.notes.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-slate-900 text-base mb-3">היסטוריית הערות</h3>
+          <div className="space-y-3">
+            {request.notes.map((note, i) => (
+              <div key={i} className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-slate-900">{note.author}</span>
+                  <span className="text-xs text-slate-500">{note.date}</span>
+                </div>
+                {note.newStatus && (
+                  <p className="text-xs text-slate-500 mb-1">
+                    שינוי סטטוס ל: <span className="font-semibold">{note.newStatus}</span>
+                  </p>
+                )}
+                <p className="text-sm text-slate-700">{note.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
 
       {/* Action Buttons */}
       <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 flex items-center justify-between gap-4">

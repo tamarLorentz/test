@@ -4,6 +4,7 @@ import { Search, ListFilter, Plus } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { mockRequests, PaymentRequest, RequestStatus } from '../data/mockRequests'
 import { RequestCard } from '../components/RequestCard'
+import { canOpenRequest, getActionLabel, ROLES } from '../utils/permissions'
 
 const allStatuses: RequestStatus[] = ['טיוטה', 'בדיקה', 'ממתין להבהרה', 'אושר לתשלום', 'נדחה', 'סיום']
 
@@ -19,7 +20,7 @@ export function DashboardPage() {
     if (!user) return requests
     
     // Consultants see only their own requests
-    if (user.role === 'יועץ') {
+    if (user.role === ROLES.CONSULTANT) {
       return requests.filter(req => req.requestor === user.firstName + ' ' + user.lastName)
     }
     
@@ -47,13 +48,13 @@ export function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
-            {user?.role === 'יועץ' ? 'הבקשות שלי' : 'כל הבקשות'}
+            {user?.role === ROLES.CONSULTANT ? 'הבקשות שלי' : 'כל הבקשות'}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            {user?.role === 'יועץ' ? '🔷 יועץ' : '👤 עובד ארגון'} | {filteredRequests.length} בקשות
+            {user?.role === ROLES.CONSULTANT ? '🔷 יועץ' : '👤 עובד ארגון'} | {filteredRequests.length} בקשות
           </p>
         </div>
-        {user?.role === 'יועץ' && (
+        {user?.role === ROLES.CONSULTANT && (
           <button
             onClick={() => navigate('/requests/new')}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
@@ -104,6 +105,8 @@ export function DashboardPage() {
               <RequestCard
                 key={request.id}
                 request={request}
+                onAction={user && canOpenRequest(request, user) ? () => navigate(`/requests/${request.id}/edit`) : undefined}
+                actionLabel={user ? getActionLabel(user) : undefined}
               />
             ))}
           </div>

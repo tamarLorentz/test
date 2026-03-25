@@ -18,7 +18,7 @@ export interface SLAMetrics {
   totalRequests: number
   approvedRecently: number
   slaViolations: number // Requests exceeding 90 days
-  stuckRequests: number // Requests in "בדיקה" or "ממתין להבהרה" status
+  stuckRequests: number // Requests in "ממתין להבהרה" for more than 15 days
   pendingClarification: number
   totalDays: number
 }
@@ -34,7 +34,7 @@ export function calculateSLAMetrics(requests: PaymentRequest[]): SLAMetrics {
     ...req,
     daysInSystem: getDaysInSystem(req.date),
     isViolation: getDaysInSystem(req.date) > 90,
-    isStuck: req.status === 'טיוטה' || req.status === 'בדיקה' || req.status === 'ממתין להבהרה'
+    isStuck: req.status === 'ממתין להבהרה' && getDaysInSystem(req.date) > 15
   }))
 
   const today = new Date(2026, 2, 24)
@@ -57,6 +57,6 @@ export function getSLARequests(requests: PaymentRequest[]): SLARequest[] {
     ...req,
     daysInSystem: getDaysInSystem(req.date),
     isViolation: getDaysInSystem(req.date) > 90,
-    isStuck: req.status === 'טיוטה' || req.status === 'בדיקה' || req.status === 'ממתין להבהרה'
+    isStuck: req.status === 'ממתין להבהרה' && getDaysInSystem(req.date) > 15
   }))
 }

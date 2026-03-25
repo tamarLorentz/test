@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
 import { RequestForm } from '../components/RequestForm'
 import { ConsultantFormData } from '../utils/formValidation'
-import { PaymentRequest, mockRequests } from '../data/mockRequests'
+import { PaymentRequest, RequestNote, mockRequests } from '../data/mockRequests'
+import { ROLES, consultantCanEdit } from '../utils/permissions'
 
 export function RequestFormPage() {
   const navigate = useNavigate()
@@ -26,9 +27,8 @@ export function RequestFormPage() {
       }
 
       // Consultants can only edit their own requests
-      if (user?.role === 'יועץ') {
-        const fullName = user.firstName + ' ' + user.lastName
-        if (request.requestor !== fullName) {
+      if (user?.role === ROLES.CONSULTANT) {
+        if (!consultantCanEdit(request, user)) {
           setAccessDenied(true)
           setIsLoading(false)
           return
@@ -54,7 +54,7 @@ export function RequestFormPage() {
 
     // For consultants, force their own name
     let consultantName = formData.consultantName
-    if (user?.role === 'יועץ') {
+    if (user?.role === ROLES.CONSULTANT) {
       consultantName = user.firstName + ' ' + user.lastName
     }
 
@@ -115,19 +115,32 @@ export function RequestFormPage() {
 
   const handleUpdateStatus = (newStatus: string) => {
     if (editingRequest) {
+      const now = new Date()
+      const dateStr = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`
+
+      const existingNotes = editingRequest.notes || []
+      const newNotes = noteText.trim()
+        ? [
+            ...existingNotes,
+            {
+              author: user!.firstName + ' ' + user!.lastName,
+              role: user!.role,
+              text: noteText.trim(),
+              date: dateStr,
+              newStatus
+            } as RequestNote
+          ]
+        : existingNotes
+
       const updatedRequest: PaymentRequest = {
         ...editingRequest,
-        status: newStatus as any
+        status: newStatus as any,
+        notes: newNotes
       }
 
       const index = mockRequests.findIndex(r => r.id === editingRequest.id)
       if (index !== -1) {
         mockRequests[index] = updatedRequest
-      }
-
-      // Log the note if provided
-      if (noteText.trim()) {
-        console.log(`📝 הערה עבור בקשה ${editingRequest.id}:`, noteText)
       }
 
       showSuccess(`סטטוס עודכן ל: ${newStatus}`)
@@ -183,12 +196,12 @@ export function RequestFormPage() {
 
   // For consultants, pre-fill with their name
   let initialConsultantName = ''
-  if (user?.role === 'יועץ') {
+  if (user?.role === ROLES.CONSULTANT) {
     initialConsultantName = user.firstName + ' ' + user.lastName
   }
 
   // Employee edit mode: show status update view instead of form
-  if (user?.role === 'עובד ארגון' && editingRequest) {
+  if (user?.role === ROLES.EMPLOYEE && editingRequest) {
     return (
       <div className="min-h-screen bg-slate-50 p-8">
         <div className="max-w-2xl mx-auto bg-white rounded-lg border border-slate-200">
@@ -300,7 +313,7 @@ export function RequestFormPage() {
           onSave={handleSaveForm}
           onCancel={handleCancel}
           initialConsultantName={initialConsultantName}
-          isConsultant={user?.role === 'יועץ'}
+          isConsultant={user?.role === ROLES.CONSULTANT}
         />
       </div>
     </div>

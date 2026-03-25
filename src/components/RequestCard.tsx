@@ -1,20 +1,15 @@
-import { useNavigate } from 'react-router-dom'
 import { PaymentRequest } from '../data/mockRequests'
-import { useUser } from '../context/UserContext'
 import { StatusBadge } from './StatusBadge'
 import { PriorityBadge } from './PriorityBadge'
 import { Edit2 } from 'lucide-react'
 
 interface RequestCardProps {
   request: PaymentRequest
+  onAction?: () => void
+  actionLabel?: string
 }
 
-export function RequestCard({ request }: RequestCardProps) {
-  const navigate = useNavigate()
-  const { user } = useUser()
-
-  // Only employees can edit requests
-  const canEdit = user?.role === 'עובד ארגון'
+export function RequestCard({ request, onAction, actionLabel }: RequestCardProps) {
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-4">
@@ -48,14 +43,14 @@ export function RequestCard({ request }: RequestCardProps) {
         <span className="text-lg font-bold text-blue-600">₪{request.amount.toLocaleString('he-IL')}</span>
       </div>
 
-      {/* Edit Button */}
-      {canEdit && (
+      {/* Action Button */}
+      {onAction && (
         <button
-          onClick={() => navigate(`/requests/${request.id}/edit`)}
+          onClick={onAction}
           className="w-full mt-4 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors"
         >
           <Edit2 className="w-4 h-4" />
-          ערוך בקשה
+          {actionLabel}
         </button>
       )}
     </div>

@@ -118,7 +118,7 @@ export function SLADashboard() {
         <div className="border-b border-orange-200 px-6 py-4 bg-orange-50">
           <h2 className="text-lg font-bold text-orange-900 flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
-            בקשות תקועות - טיוטה, בדיקה או ממתין להבהרה
+            בקשות תקועות - ממתין להבהרה מעל 15 יום
           </h2>
         </div>
 
