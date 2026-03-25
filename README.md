@@ -440,7 +440,7 @@ Create the full interactive prototype with all screens, role toggle, and sample 
 - קלאסים כפולים או סותרים
 - רשימות קלאסים ארוכות ולא קריאות
 
-4. נגישות (a11y):
+4.   נגישות (a11y):
 - חוסר ב־aria attributes
 - בעיות semantic HTML
 - חוסר בתמיכה במקלדת
